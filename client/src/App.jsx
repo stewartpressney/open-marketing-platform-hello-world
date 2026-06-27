@@ -1,39 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from './supabase.js';
+import Auth from './Auth.jsx';
+import Dashboard from './Dashboard.jsx';
 
 export default function App() {
-  const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const checkConnection = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.getSession();
-      if (error) throw error;
-      setStatus('Connected to Supabase.');
-    } catch (err) {
-      setStatus(`Supabase: ${err.message}`);
-    } finally {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setLoading(false);
-    }
-  };
+    });
 
-  return (
-    <main style={{ maxWidth: 480, margin: '4rem auto', padding: '0 1rem' }}>
-      <article>
-        <header>
-          <h1>Open Marketing Platform</h1>
-          <p>React + Vite + <a href="https://supabase.com">Supabase</a> + <a href="https://oat.ink">Oat</a></p>
-        </header>
-        <button onClick={checkConnection} disabled={loading}>
-          {loading ? 'Checking…' : 'Test Supabase connection'}
-        </button>
-        {status && (
-          <p role="alert" style={{ marginTop: '1rem' }}>
-            {status}
-          </p>
-        )}
-      </article>
-    </main>
-  );
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) return null;
+
+  return user ? <Dashboard user={user} /> : <Auth />;
 }
