@@ -10,6 +10,31 @@ export default function Dashboard({ user }) {
   const [showForm, setShowForm] = useState(false);
   const signOut = () => supabase.auth.signOut();
 
+  function renderContent() {
+    if (selectedId) {
+      return <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />;
+    }
+    if (showForm) {
+      return (
+        <CreateRequest
+          user={user}
+          onBack={() => setShowForm(false)}
+          onCreated={() => {
+            setListKey(k => k + 1);
+            setShowForm(false);
+          }}
+        />
+      );
+    }
+    return (
+      <RequestList
+        key={listKey}
+        onView={setSelectedId}
+        onNewRequest={() => setShowForm(true)}
+      />
+    );
+  }
+
   return (
     <main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -19,28 +44,7 @@ export default function Dashboard({ user }) {
           <button onClick={signOut}>Sign out</button>
         </span>
       </header>
-
-      {selectedId ? (
-        <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />
-      ) : (
-        <>
-          {showForm && (
-            <CreateRequest
-              user={user}
-              onCreated={() => {
-                setListKey(k => k + 1);
-                setShowForm(false);
-              }}
-            />
-          )}
-          <RequestList
-            key={listKey}
-            onView={setSelectedId}
-            showForm={showForm}
-            onNewRequest={() => setShowForm(v => !v)}
-          />
-        </>
-      )}
+      {renderContent()}
     </main>
   );
 }

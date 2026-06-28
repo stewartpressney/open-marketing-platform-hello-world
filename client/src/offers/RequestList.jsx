@@ -11,7 +11,7 @@ const BUDGET_BANDS = [
   { label: '$15,000+', min: 15000, max: Infinity },
 ];
 
-export default function RequestList({ onView, onNewRequest, showForm }) {
+export default function RequestList({ onView, onNewRequest }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,11 +44,7 @@ export default function RequestList({ onView, onNewRequest, showForm }) {
     <section>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2 style={{ margin: 0 }}>Open Requests</h2>
-        {showForm ? (
-          <a href="#" onClick={e => { e.preventDefault(); onNewRequest(); }}>← Back to open requests</a>
-        ) : (
-          <button onClick={onNewRequest}>New request</button>
-        )}
+        <button onClick={onNewRequest}>New request</button>
       </header>
 
       <fieldset style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', border: 'none', padding: 0, margin: '1rem 0' }}>
