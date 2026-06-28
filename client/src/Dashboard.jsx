@@ -7,7 +7,33 @@ import RequestDetail from './offers/RequestDetail.jsx';
 export default function Dashboard({ user }) {
   const [listKey, setListKey] = useState(0);
   const [selectedId, setSelectedId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const signOut = () => supabase.auth.signOut();
+
+  function renderContent() {
+    if (selectedId) {
+      return <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />;
+    }
+    if (showForm) {
+      return (
+        <CreateRequest
+          user={user}
+          onBack={() => setShowForm(false)}
+          onCreated={() => {
+            setListKey(k => k + 1);
+            setShowForm(false);
+          }}
+        />
+      );
+    }
+    return (
+      <RequestList
+        key={listKey}
+        onView={setSelectedId}
+        onNewRequest={() => setShowForm(true)}
+      />
+    );
+  }
 
   return (
     <main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
@@ -18,16 +44,7 @@ export default function Dashboard({ user }) {
           <button onClick={signOut}>Sign out</button>
         </span>
       </header>
-
-      {selectedId ? (
-        <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />
-      ) : (
-        <>
-          <CreateRequest user={user} onCreated={() => setListKey(k => k + 1)} />
-          <hr style={{ margin: '2rem 0' }} />
-          <RequestList key={listKey} onView={setSelectedId} />
-        </>
-      )}
+      {renderContent()}
     </main>
   );
 }

@@ -12,7 +12,7 @@ const EMPTY = {
   total_budget: '',
 };
 
-export default function CreateRequest({ user, onCreated }) {
+export default function CreateRequest({ user, onCreated, onBack }) {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +46,9 @@ export default function CreateRequest({ user, onCreated }) {
 
   return (
     <section>
+      <nav>
+        <a href="#" onClick={e => { e.preventDefault(); onBack(); }}>← Back to open requests</a>
+      </nav>
       <h2>New Request for Creative</h2>
       <form onSubmit={handleSubmit}>
         <label>
