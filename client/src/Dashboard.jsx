@@ -16,11 +16,6 @@ export default function Dashboard({ user }) {
         <h1 style={{ margin: 0 }}>Open Marketing Platform</h1>
         <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <small>{user.email}</small>
-          {!selectedId && (
-            <button onClick={() => setShowForm(v => !v)}>
-              {showForm ? 'Cancel' : 'New request'}
-            </button>
-          )}
           <button onClick={signOut}>Sign out</button>
         </span>
       </header>
@@ -38,7 +33,12 @@ export default function Dashboard({ user }) {
               }}
             />
           )}
-          <RequestList key={listKey} onView={setSelectedId} />
+          <RequestList
+            key={listKey}
+            onView={setSelectedId}
+            showForm={showForm}
+            onNewRequest={() => setShowForm(v => !v)}
+          />
         </>
       )}
     </main>
