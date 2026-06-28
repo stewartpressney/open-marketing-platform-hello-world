@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { supabase } from './supabase.js';
 import CreateRequest from './offers/CreateRequest.jsx';
 import RequestList from './offers/RequestList.jsx';
+import RequestDetail from './offers/RequestDetail.jsx';
 
 export default function Dashboard({ user }) {
   const [listKey, setListKey] = useState(0);
+  const [selectedId, setSelectedId] = useState(null);
   const signOut = () => supabase.auth.signOut();
 
   return (
@@ -16,9 +18,16 @@ export default function Dashboard({ user }) {
           <button onClick={signOut}>Sign out</button>
         </span>
       </header>
-      <CreateRequest user={user} onCreated={() => setListKey(k => k + 1)} />
-      <hr style={{ margin: '2rem 0' }} />
-      <RequestList key={listKey} />
+
+      {selectedId ? (
+        <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />
+      ) : (
+        <>
+          <CreateRequest user={user} onCreated={() => setListKey(k => k + 1)} />
+          <hr style={{ margin: '2rem 0' }} />
+          <RequestList key={listKey} onView={setSelectedId} />
+        </>
+      )}
     </main>
   );
 }

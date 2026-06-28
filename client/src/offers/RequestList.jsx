@@ -11,7 +11,7 @@ const BUDGET_BANDS = [
   { label: '$15,000+', min: 15000, max: Infinity },
 ];
 
-export default function RequestList() {
+export default function RequestList({ onView }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,6 +75,7 @@ export default function RequestList() {
                 <th>Category</th>
                 <th>Offer / lead</th>
                 <th>Budget</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -91,6 +92,7 @@ export default function RequestList() {
                   <td>{r.category}</td>
                   <td>${r.offer_per_lead ?? 0}</td>
                   <td>{r.total_budget ? `$${Number(r.total_budget).toLocaleString()}` : '—'}</td>
+                  <td><button onClick={() => onView(r.id)}>View</button></td>
                 </tr>
               ))}
             </tbody>
