@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { supabase } from './supabase.js';
 
+// Mode-based titles and submit labels kept as lookup objects so the JSX
+// stays declarative and adding a new mode only requires updating these maps.
 const TITLES = {
   signin: 'Sign in to your account',
   signup: 'Create an account',
@@ -15,6 +17,9 @@ const SUBMIT_LABELS = {
   reset: 'Set new password',
 };
 
+// A single component handles all four auth states (signin / signup / forgot / reset)
+// so that shared form state (email, error messages) persists across mode switches
+// without remounting.
 export default function Auth({ initialMode = 'signin' }) {
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
@@ -24,6 +29,7 @@ export default function Auth({ initialMode = 'signin' }) {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Clear sensitive fields and messages when switching between modes.
   const switchMode = (next) => {
     setMode(next);
     setError(null);
@@ -37,6 +43,8 @@ export default function Auth({ initialMode = 'signin' }) {
     setError(null);
     setMessage(null);
 
+    // Client-side guard — Supabase would catch this too, but this gives
+    // instant feedback without a round trip.
     if ((mode === 'signup' || mode === 'reset') && password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -47,11 +55,14 @@ export default function Auth({ initialMode = 'signin' }) {
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
+      // On success, onAuthStateChange in App fires SIGNED_IN → transitions to Dashboard.
     } else if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) setError(error.message);
       else setMessage('Check your email to confirm your account.');
     } else if (mode === 'forgot') {
+      // redirectTo must be a URL registered in Supabase Auth → URL Configuration.
+      // Supabase appends a token to it and sends the link to the user's email.
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
       });
@@ -60,7 +71,7 @@ export default function Auth({ initialMode = 'signin' }) {
     } else if (mode === 'reset') {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) setError(error.message);
-      // On success, onAuthStateChange fires SIGNED_IN → App transitions to Dashboard
+      // On success, onAuthStateChange fires SIGNED_IN → App transitions to Dashboard.
     }
 
     setLoading(false);
@@ -94,6 +105,8 @@ export default function Auth({ initialMode = 'signin' }) {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                // Hints the browser password manager whether to autofill
+                // the saved password or suggest a new one.
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 minLength={6}
               />

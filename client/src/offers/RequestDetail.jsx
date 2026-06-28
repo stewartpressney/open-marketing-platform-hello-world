@@ -1,24 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useSupabaseQuery } from '../hooks/useSupabaseQuery.js';
 import { supabase } from '../supabase.js';
+import BackLink from '../components/BackLink.jsx';
 
 export default function RequestDetail({ id, onBack }) {
-  const [request, setRequest] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    async function load() {
-      const { data, error } = await supabase
-        .from('offers')
-        .select('*')
-        .eq('id', id)
-        .single();
-      if (error) setError(error.message);
-      else setRequest(data);
-      setLoading(false);
-    }
-    load();
-  }, [id]);
+  // .single() tells Supabase to expect exactly one row and return it directly
+  // rather than an array. It errors if the row is missing, which surfaces cleanly.
+  const { data: request, loading, error } = useSupabaseQuery(
+    () => supabase.from('offers').select('*').eq('id', id).single(),
+    [id] // re-fetch if the id prop changes
+  );
 
   if (loading) return <p>Loading…</p>;
   if (error) return <p role="alert">{error}</p>;
@@ -27,9 +17,7 @@ export default function RequestDetail({ id, onBack }) {
   return (
     <article>
       <header>
-        <nav>
-          <a href="#" onClick={e => { e.preventDefault(); onBack(); }}>← Back to open requests</a>
-        </nav>
+        <BackLink onBack={onBack} />
         <h2 style={{ marginTop: '1rem', marginBottom: '0.25rem' }}>{request.title}</h2>
         <p style={{ margin: 0 }}><strong>{request.category}</strong></p>
       </header>

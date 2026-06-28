@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useSupabaseQuery } from '../hooks/useSupabaseQuery.js';
 import { supabase } from '../supabase.js';
 
 const CATEGORIES = ['All', 'Retail', 'Food & Drink', 'Events', 'Services', 'Health & Beauty', 'Other'];
 
+// Budget bands for client-side filtering. Infinity avoids a sentinel value
+// for "no upper limit" and works cleanly with numeric comparisons.
 const BUDGET_BANDS = [
   { label: 'Any budget', min: 0, max: Infinity },
   { label: 'Under $1,000', min: 0, max: 1000 },
@@ -12,32 +15,25 @@ const BUDGET_BANDS = [
 ];
 
 export default function RequestList({ onView, onNewRequest }) {
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [category, setCategory] = useState('All');
   const [budgetBand, setBudgetBand] = useState(0);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('offers')
-        .select('id, title, category, description, target_link, offer_per_lead, total_budget')
-        .order('created_at', { ascending: false });
-      if (error) setError(error.message);
-      else setRequests(data ?? []);
-      setLoading(false);
-    }
-    load();
-  }, []);
+  // Fetch all offers once on mount. Filtering is client-side because the
+  // dataset is small and avoids extra round trips on every filter change.
+  const { data, loading, error } = useSupabaseQuery(
+    () => supabase
+      .from('offers')
+      .select('id, title, category, description, target_link, offer_per_lead, total_budget')
+      .order('created_at', { ascending: false }),
+    []
+  );
 
+  const requests = data ?? [];
   const band = BUDGET_BANDS[budgetBand];
   const filtered = requests.filter(r => {
     if (category !== 'All' && r.category !== category) return false;
     const budget = r.total_budget ?? 0;
-    if (budget < band.min || budget > band.max) return false;
-    return true;
+    return budget >= band.min && budget <= band.max;
   });
 
   return (
