@@ -23,8 +23,8 @@ export default function RequestList() {
       setLoading(true);
       const { data, error } = await supabase
         .from('offers')
-        .select('id, title, category, description, target_link, offer_per_lead, total_budget, date')
-        .order('date', { ascending: false });
+        .select('id, title, category, description, target_link, offer_per_lead, total_budget')
+        .order('created_at', { ascending: false });
       if (error) setError(error.message);
       else setRequests(data ?? []);
       setLoading(false);
@@ -75,7 +75,6 @@ export default function RequestList() {
                 <th>Category</th>
                 <th>Offer / lead</th>
                 <th>Budget</th>
-                <th>Date</th>
               </tr>
             </thead>
             <tbody>
@@ -92,7 +91,6 @@ export default function RequestList() {
                   <td>{r.category}</td>
                   <td>${r.offer_per_lead ?? 0}</td>
                   <td>{r.total_budget ? `$${Number(r.total_budget).toLocaleString()}` : '—'}</td>
-                  <td>{r.date ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
