@@ -8,6 +8,7 @@ export default function AccountSettings({ user, onBack }) {
   const [emailError, setEmailError] = useState(null);
   const [emailLoading, setEmailLoading] = useState(false);
 
+  const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState(null);
@@ -42,12 +43,28 @@ export default function AccountSettings({ user, onBack }) {
     }
 
     setPasswordLoading(true);
+
+    // Re-authenticate with the current password before allowing the change.
+    // Supabase's updateUser doesn't require the current password, so we verify
+    // it ourselves via signInWithPassword first.
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+
+    if (authError) {
+      setPasswordError('Current password is incorrect.');
+      setPasswordLoading(false);
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
       setPasswordError(error.message);
     } else {
       setPasswordMessage('Password updated.');
+      setCurrentPassword('');
       setPassword('');
       setConfirmPassword('');
     }
@@ -87,6 +104,16 @@ export default function AccountSettings({ user, onBack }) {
       <section style={{ maxWidth: 480 }}>
         <h3>Change password</h3>
         <form onSubmit={handlePasswordUpdate}>
+          <label>
+            Current password
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </label>
           <label>
             New password
             <input
