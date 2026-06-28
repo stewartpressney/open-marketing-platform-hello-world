@@ -1,11 +1,16 @@
+import { useState } from 'react';
 import { supabase } from './supabase.js';
 import CreateRequest from './offers/CreateRequest.jsx';
+import RequestList from './offers/RequestList.jsx';
+import RequestDetail from './offers/RequestDetail.jsx';
 
 export default function Dashboard({ user }) {
+  const [listKey, setListKey] = useState(0);
+  const [selectedId, setSelectedId] = useState(null);
   const signOut = () => supabase.auth.signOut();
 
   return (
-    <main style={{ maxWidth: 640, margin: '2rem auto', padding: '0 1rem' }}>
+    <main style={{ maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ margin: 0 }}>Open Marketing Platform</h1>
         <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -13,7 +18,16 @@ export default function Dashboard({ user }) {
           <button onClick={signOut}>Sign out</button>
         </span>
       </header>
-      <CreateRequest user={user} />
+
+      {selectedId ? (
+        <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />
+      ) : (
+        <>
+          <CreateRequest user={user} onCreated={() => setListKey(k => k + 1)} />
+          <hr style={{ margin: '2rem 0' }} />
+          <RequestList key={listKey} onView={setSelectedId} />
+        </>
+      )}
     </main>
   );
 }

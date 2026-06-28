@@ -10,7 +10,6 @@ const EMPTY = {
   target_link: '',
   offer_per_lead: '',
   total_budget: '',
-  date: '',
 };
 
 export default function CreateRequest({ user, onCreated }) {
@@ -33,7 +32,6 @@ export default function CreateRequest({ user, onCreated }) {
       target_link: form.target_link || null,
       offer_per_lead: form.offer_per_lead ? parseFloat(form.offer_per_lead) : null,
       total_budget: form.total_budget ? parseFloat(form.total_budget) : null,
-      date: form.date,
     });
 
     if (error) {
@@ -76,10 +74,6 @@ export default function CreateRequest({ user, onCreated }) {
         <label>
           Total campaign budget — <strong>${Number(form.total_budget || 0).toLocaleString()}</strong>
           <input type="range" value={form.total_budget || 0} onChange={set('total_budget')} min="0" max="50000" step="500" />
-        </label>
-        <label>
-          Date
-          <input type="date" value={form.date} onChange={set('date')} required />
         </label>
         {error && <p role="alert">{error}</p>}
         <button type="submit" disabled={loading}>
