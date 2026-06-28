@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../supabase.js';
+import BackLink from '../components/BackLink.jsx';
 
 const CATEGORIES = ['Retail', 'Food & Drink', 'Events', 'Services', 'Health & Beauty', 'Other'];
 
@@ -17,6 +18,8 @@ export default function CreateRequest({ user, onCreated, onBack }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Returns a change handler for a named form field, keeping the handler
+  // definition out of the JSX so each input doesn't create a new function on render.
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
   const handleSubmit = async (e) => {
@@ -29,7 +32,9 @@ export default function CreateRequest({ user, onCreated, onBack }) {
       title: form.title,
       category: form.category,
       description: form.description,
+      // Coerce empty string to null so Supabase doesn't reject the url column type.
       target_link: form.target_link || null,
+      // Range inputs always yield strings; Supabase expects numeric types.
       offer_per_lead: form.offer_per_lead ? parseFloat(form.offer_per_lead) : null,
       total_budget: form.total_budget ? parseFloat(form.total_budget) : null,
     });
@@ -46,9 +51,7 @@ export default function CreateRequest({ user, onCreated, onBack }) {
 
   return (
     <section>
-      <nav>
-        <a href="#" onClick={e => { e.preventDefault(); onBack(); }}>← Back to open requests</a>
-      </nav>
+      <BackLink onBack={onBack} />
       <h2>New Request for Creative</h2>
       <form onSubmit={handleSubmit}>
         <label>

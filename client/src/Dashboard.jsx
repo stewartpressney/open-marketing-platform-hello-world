@@ -5,11 +5,16 @@ import RequestList from './offers/RequestList.jsx';
 import RequestDetail from './offers/RequestDetail.jsx';
 
 export default function Dashboard({ user }) {
-  const [listKey, setListKey] = useState(0);
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  // Incrementing listKey forces RequestList to remount after a new request
+  // is submitted, triggering a fresh fetch without prop drilling a refetch callback.
+  const [listKey, setListKey] = useState(0);
+
   const signOut = () => supabase.auth.signOut();
 
+  // Three mutually exclusive views: detail, form, or list.
+  // Only one renders at a time — no nested or overlapping states.
   function renderContent() {
     if (selectedId) {
       return <RequestDetail id={selectedId} onBack={() => setSelectedId(null)} />;
