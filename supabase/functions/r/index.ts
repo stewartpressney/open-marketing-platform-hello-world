@@ -9,6 +9,7 @@
 // Deploy with: supabase functions deploy r --no-verify-jwt
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { embeddedOne } from '../_shared/postgrest.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
   if (error) return fail('Lookup failed.', 500);
   if (!application) return fail('Unknown or inactive tracking link.', 404);
 
-  const offer = application.offers as { user_id: string; target_link: string | null } | null;
+  const offer = embeddedOne<{ user_id: string; target_link: string | null }>(application.offers);
   if (!offer?.target_link) return fail('This request has no target link.', 404);
 
   // Resolve the request owner's site so the click shows up alongside the

@@ -12,6 +12,7 @@
 // Deploy with: supabase functions deploy collect --no-verify-jwt
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { embeddedOne } from '../_shared/postgrest.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -79,7 +80,7 @@ async function record(payload: Payload): Promise<number> {
     // Only attribute when the request behind the code actually belongs to the
     // account that owns this site. Otherwise anyone could paste someone
     // else's code onto their page and inflate that applicant's numbers.
-    const offer = application?.offers as { user_id: string } | null;
+    const offer = embeddedOne<{ user_id: string }>(application?.offers);
     if (application && offer?.user_id === site.user_id) {
       applicationId = application.id;
       offerId = application.offer_id;
