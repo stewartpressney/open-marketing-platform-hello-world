@@ -44,5 +44,10 @@ jobs:
 
       # The functions are never exercised by the client build, so without this
       # they would reach production entirely unchecked.
+      #
+      # --node-modules-dir=auto because the repo root has a package.json, which
+      # puts Deno in manual mode and makes it refuse to resolve supabase-js's
+      # transitive npm deps. Passing it here rather than adding a deno.json
+      # keeps the workaround out of what Supabase deploys.
       - name: Typecheck
-        run: deno check supabase/functions/*/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/*/index.ts
