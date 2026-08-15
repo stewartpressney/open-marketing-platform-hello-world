@@ -13,7 +13,8 @@
       "Bash(gh pr create --title 'Replace Express with Supabase' --body ' *)",
       "Bash(gh pr *)",
       "Bash(git push *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__send_later"
     ]
   }
 }
