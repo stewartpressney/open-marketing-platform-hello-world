@@ -1,0 +1,7 @@
+# Both tracking functions are called by anonymous visitors on third-party
+# websites, so they must not require a Supabase JWT.
+[functions.r]
+verify_jwt = false
+
+[functions.collect]
+verify_jwt = false

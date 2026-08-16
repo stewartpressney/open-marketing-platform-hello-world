@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabase.js';
 import BackLink from '../components/BackLink.jsx';
+import TrackingPixel from './TrackingPixel.jsx';
 
 export default function AccountSettings({ user, onBack }) {
   const [email, setEmail] = useState(user.email);
@@ -142,6 +143,13 @@ export default function AccountSettings({ user, onBack }) {
             {passwordLoading ? 'Saving…' : 'Update password'}
           </button>
         </form>
+      </section>
+
+      <hr style={{ margin: '2rem 0' }} />
+
+      <section style={{ maxWidth: 720 }}>
+        <h3>Website tracking</h3>
+        <TrackingPixel user={user} />
       </section>
     </article>
   );
