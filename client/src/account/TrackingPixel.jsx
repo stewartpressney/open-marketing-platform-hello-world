@@ -74,8 +74,8 @@ export default function TrackingPixel({ user }) {
       <p>
         Add this to your website to see which platform members are sending you
         traffic. One snippet covers every request you post — attribution comes
-        from the link each approved applicant shares, so there is nothing to
-        change when you approve someone new.
+        from the link each member generates, so there is nothing to change when
+        someone new starts promoting you.
       </p>
 
       <label>
@@ -102,7 +102,7 @@ export default function TrackingPixel({ user }) {
         <small>
           Treat the site key as public — it ships in your page source. It only
           allows recording events against your account, and events are only
-          credited to applicants you have approved.
+          credited to links generated for your own requests.
         </small>
       </p>
     </>
