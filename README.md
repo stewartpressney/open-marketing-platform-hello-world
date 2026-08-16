@@ -20,6 +20,8 @@ model is performance-based rather than flat-fee.
   QR code, listed with its performance under **My links**.
 - **Conversion tracking** — a business installs one snippet on their website and
   sees which platform member drove each visit and lead, across all their campaigns.
+  **My requests** lists the account's own requests with the install snippet for each
+  and whether that request's target page is reporting back.
 - **Account settings** (`client/src/account/`) — update email address or password,
   and get the tracking snippet. Password changes re-authenticate against the current
   password first, since Supabase's `updateUser` does not require it.
@@ -143,9 +145,11 @@ client/
     offers/                  CreateRequest, RequestList, RequestDetail,
                              LinkPanel
     links/                   MyLinks — links, QR codes, stats
+    requests/                MyRequests — own requests, per-request pixel setup
     account/                 AccountSettings, TrackingPixel
-    components/              BackLink, CopyButton, QrCode, LinkShare
+    components/              BackLink, CopyButton, QrCode, LinkShare, CodeBlock
     hooks/useSupabaseQuery.js  shared fetch hook with cancellation
+    hooks/useSite.js           account's site row, created on demand
 supabase/
   migrations/                schema and RLS policies
   functions/r                short-link redirect

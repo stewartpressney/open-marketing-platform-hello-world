@@ -1,73 +1,16 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../supabase.js';
 import { installSnippet, CONVERSION_SNIPPET } from '../tracking.js';
-import CopyButton from '../components/CopyButton.jsx';
-
-const codeBlockStyle = {
-  overflowX: 'auto',
-  padding: '0.75rem',
-  border: '1px solid #8884',
-  borderRadius: '4px',
-  whiteSpace: 'pre',
-};
+import { useSite } from '../hooks/useSite.js';
+import CodeBlock from '../components/CodeBlock.jsx';
 
 // The account's tracking pixel: one site key, one snippet, all campaigns.
 //
-// The site row is created on demand the first time this section is opened, so
-// there is nothing to set up before an account can start tracking. The key
-// itself is minted by a database trigger, never chosen by the client.
+// My Requests shows the same snippet per request, with setup progress for each.
 export default function TrackingPixel({ user }) {
-  const [site, setSite] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadOrCreate() {
-      const { data: existing, error: readError } = await supabase
-        .from('sites')
-        .select('id, site_key')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (cancelled) return;
-
-      if (readError) {
-        setError(readError.message);
-        setLoading(false);
-        return;
-      }
-
-      if (existing) {
-        setSite(existing);
-        setLoading(false);
-        return;
-      }
-
-      // site_key is omitted deliberately — the trigger fills it in.
-      const { data: created, error: insertError } = await supabase
-        .from('sites')
-        .insert({ user_id: user.id })
-        .select('id, site_key')
-        .single();
-
-      if (cancelled) return;
-
-      if (insertError) setError(insertError.message);
-      else setSite(created);
-      setLoading(false);
-    }
-
-    loadOrCreate();
-    return () => { cancelled = true; };
-  }, [user.id]);
+  const { site, loading, error } = useSite(user.id);
 
   if (loading) return <p>Loading…</p>;
   if (error) return <p role="alert">{error}</p>;
   if (!site) return null;
-
-  const snippet = installSnippet(site.site_key);
 
   return (
     <>
@@ -85,8 +28,7 @@ export default function TrackingPixel({ user }) {
 
       <h4 style={{ marginTop: '1.5rem' }}>1. Install on every page</h4>
       <p><small>Paste this just before the closing <code>&lt;/body&gt;</code> tag.</small></p>
-      <pre style={codeBlockStyle}><code>{snippet}</code></pre>
-      <CopyButton text={snippet} label="Copy snippet" />
+      <CodeBlock code={installSnippet(site.site_key)} copyLabel="Copy snippet" />
 
       <h4 style={{ marginTop: '1.5rem' }}>2. Record a lead</h4>
       <p>
@@ -95,8 +37,7 @@ export default function TrackingPixel({ user }) {
           optional and records what the lead was worth to you.
         </small>
       </p>
-      <pre style={codeBlockStyle}><code>{CONVERSION_SNIPPET}</code></pre>
-      <CopyButton text={CONVERSION_SNIPPET} label="Copy conversion call" />
+      <CodeBlock code={CONVERSION_SNIPPET} copyLabel="Copy conversion call" />
 
       <p style={{ marginTop: '1.5rem' }}>
         <small>
