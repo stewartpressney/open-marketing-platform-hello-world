@@ -15,11 +15,13 @@ model is performance-based rather than flat-fee.
 - **Requests** (`client/src/offers/`) — create a request for creative, browse open
   requests in a filterable table (by category and budget band), and open a single
   request's detail view.
-- **Applications** — members apply to a request they don't own; the request owner
-  approves or rejects from the request's detail page. Approval mints a unique
-  tracking code, which becomes a short link and a QR code under **My applications**.
+- **Tracking links** — any member generates a unique tracking code for any request
+  from its detail page, with no approval step. The code becomes a short link and a
+  QR code, listed with its performance under **My links**.
 - **Conversion tracking** — a business installs one snippet on their website and
   sees which platform member drove each visit and lead, across all their campaigns.
+  **My requests** lists the account's own requests with the install snippet for each
+  and whether that request's target page is reporting back.
 - **Account settings** (`client/src/account/`) — update email address or password,
   and get the tracking snippet. Password changes re-authenticate against the current
   password first, since Supabase's `updateUser` does not require it.
@@ -72,9 +74,11 @@ the CLI:
 supabase db push
 ```
 
-`supabase/migrations/0001_applications_and_tracking.sql` creates `applications`,
-`sites`, and `tracking_events` with their RLS policies, plus the
-`application_stats` rollup view. It does not touch the existing `offers` table.
+`supabase/migrations/0001_applications_and_tracking.sql` creates the initial
+`applications`, `sites` and `tracking_events` tables with their RLS policies.
+`0002_links_replace_applications.sql` then removes the approval flow, renaming
+`applications` to `links` and rebuilding the rollup view as `link_stats`.
+Neither touches the existing `offers` table.
 
 ### Edge Functions
 
@@ -139,11 +143,13 @@ client/
     supabase.js              Supabase client
     tracking.js              tracking URLs and install snippet
     offers/                  CreateRequest, RequestList, RequestDetail,
-                             ApplyPanel, ApplicationsPanel
-    applications/            MyApplications — links, QR codes, stats
+                             LinkPanel
+    links/                   MyLinks — links, QR codes, stats
+    requests/                MyRequests — own requests, per-request pixel setup
     account/                 AccountSettings, TrackingPixel
-    components/              BackLink, CopyButton, QrCode
+    components/              BackLink, CopyButton, QrCode, LinkShare, CodeBlock
     hooks/useSupabaseQuery.js  shared fetch hook with cancellation
+    hooks/useSite.js           account's site row, created on demand
 supabase/
   migrations/                schema and RLS policies
   functions/r                short-link redirect

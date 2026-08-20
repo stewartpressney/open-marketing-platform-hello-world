@@ -2,7 +2,7 @@
 //
 //   https://<project-ref>.supabase.co/functions/v1/r/<tracking_code>
 //
-// Looks up the approved application behind the code, records a click, and
+// Looks up the link behind the code, records a click, and
 // sends the visitor to the request's target link with `?omp=<code>` appended
 // so the pixel on the destination site can attribute the visit.
 //
@@ -35,23 +35,22 @@ Deno.serve(async (req) => {
 
   if (!code) return fail('Missing tracking code.', 400);
 
-  const { data: application, error } = await supabase
-    .from('applications')
-    .select('id, offer_id, status, offers ( user_id, target_link )')
+  const { data: link, error } = await supabase
+    .from('links')
+    .select('id, offer_id, offers ( user_id, target_link )')
     .eq('tracking_code', code)
-    .eq('status', 'approved')
     .maybeSingle();
 
   if (error) return fail('Lookup failed.', 500);
-  if (!application) return fail('Unknown or inactive tracking link.', 404);
+  if (!link) return fail('Unknown or inactive tracking link.', 404);
 
-  const offer = embeddedOne<{ user_id: string; target_link: string | null }>(application.offers);
+  const offer = embeddedOne<{ user_id: string; target_link: string | null }>(link.offers);
   if (!offer?.target_link) return fail('This request has no target link.', 404);
 
   // Resolve the request owner's site so the click shows up alongside the
   // pixel's own events. A business that has never opened Account Settings
   // has no site row yet, which is fine — the click is still attributed to
-  // the application.
+  // the link.
   const { data: site } = await supabase
     .from('sites')
     .select('id')
@@ -61,8 +60,8 @@ Deno.serve(async (req) => {
   // Fire and forget: a tracking write must never delay or break the redirect.
   await supabase.from('tracking_events').insert({
     site_id: site?.id ?? null,
-    application_id: application.id,
-    offer_id: application.offer_id,
+    link_id: link.id,
+    offer_id: link.offer_id,
     event_type: 'click',
     url: offer.target_link,
     referrer: req.headers.get('referer'),

@@ -66,24 +66,23 @@ async function record(payload: Payload): Promise<number> {
 
   // Resolve attribution. An unrecognised code is not an error — the visit is
   // still recorded, just unattributed, so site totals stay honest.
-  let applicationId: string | null = null;
+  let linkId: string | null = null;
   let offerId: string | null = null;
 
   if (payload.code) {
-    const { data: application } = await supabase
-      .from('applications')
+    const { data: link } = await supabase
+      .from('links')
       .select('id, offer_id, offers ( user_id )')
       .eq('tracking_code', payload.code)
-      .eq('status', 'approved')
       .maybeSingle();
 
     // Only attribute when the request behind the code actually belongs to the
     // account that owns this site. Otherwise anyone could paste someone
-    // else's code onto their page and inflate that applicant's numbers.
-    const offer = embeddedOne<{ user_id: string }>(application?.offers);
-    if (application && offer?.user_id === site.user_id) {
-      applicationId = application.id;
-      offerId = application.offer_id;
+    // else's code onto their page and inflate that link owner's numbers.
+    const offer = embeddedOne<{ user_id: string }>(link?.offers);
+    if (link && offer?.user_id === site.user_id) {
+      linkId = link.id;
+      offerId = link.offer_id;
     }
   }
 
@@ -94,7 +93,7 @@ async function record(payload: Payload): Promise<number> {
 
   const { error } = await supabase.from('tracking_events').insert({
     site_id: site.id,
-    application_id: applicationId,
+    link_id: linkId,
     offer_id: offerId,
     event_type: event,
     value,

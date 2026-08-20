@@ -4,7 +4,8 @@ import CreateRequest from './offers/CreateRequest.jsx';
 import RequestList from './offers/RequestList.jsx';
 import RequestDetail from './offers/RequestDetail.jsx';
 import AccountSettings from './account/AccountSettings.jsx';
-import MyApplications from './applications/MyApplications.jsx';
+import MyLinks from './links/MyLinks.jsx';
+import MyRequests from './requests/MyRequests.jsx';
 
 export default function Dashboard({ user }) {
   // A single view name rather than one flag per screen: the views are mutually
@@ -47,8 +48,11 @@ export default function Dashboard({ user }) {
     if (view === 'account') {
       return <AccountSettings user={user} onBack={showList} />;
     }
-    if (view === 'applications') {
-      return <MyApplications user={user} onBack={showList} />;
+    if (view === 'links') {
+      return <MyLinks user={user} onBack={showList} />;
+    }
+    if (view === 'requests') {
+      return <MyRequests user={user} onBack={showList} />;
     }
     return (
       <RequestList
@@ -64,7 +68,8 @@ export default function Dashboard({ user }) {
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ margin: 0, cursor: 'pointer' }} onClick={showList}>Open Marketing Platform</h1>
         <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button onClick={() => setView('applications')}>My applications</button>
+          <button onClick={() => setView('requests')}>My requests</button>
+          <button onClick={() => setView('links')}>My links</button>
           <button onClick={() => setView('account')}>My account</button>
           <button onClick={signOut}>Sign out</button>
         </span>

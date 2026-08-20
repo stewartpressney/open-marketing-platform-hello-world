@@ -1,8 +1,7 @@
 import { useSupabaseQuery } from '../hooks/useSupabaseQuery.js';
 import { supabase } from '../supabase.js';
 import BackLink from '../components/BackLink.jsx';
-import ApplyPanel from './ApplyPanel.jsx';
-import ApplicationsPanel from './ApplicationsPanel.jsx';
+import LinkPanel from './LinkPanel.jsx';
 
 export default function RequestDetail({ id, user, onBack }) {
   // .single() tells Supabase to expect exactly one row and return it directly
@@ -15,9 +14,6 @@ export default function RequestDetail({ id, user, onBack }) {
   if (loading) return <p>Loading…</p>;
   if (error) return <p role="alert">{error}</p>;
   if (!request) return null;
-
-  // The owner reviews applications; everyone else can apply.
-  const isOwner = request.user_id === user.id;
 
   return (
     <article>
@@ -48,9 +44,7 @@ export default function RequestDetail({ id, user, onBack }) {
         </dl>
       </section>
 
-      {isOwner
-        ? <ApplicationsPanel offerId={request.id} />
-        : <ApplyPanel offerId={request.id} user={user} />}
+      <LinkPanel offerId={request.id} user={user} />
 
       {request.target_link && (
         <footer style={{ marginTop: '2rem' }}>
